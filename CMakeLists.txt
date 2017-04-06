@@ -13,3 +13,7 @@ install(TARGETS udpcat RUNTIME DESTINATION bin)
 add_executable(example example.c)
 target_link_libraries(example udp_conn)
 set_target_properties(example PROPERTIES LINK_FLAGS "-pthread")
+
+add_executable(echo_server echo_server.c)
+target_link_libraries(echo_server udp_conn)
+set_target_properties(echo_server PROPERTIES LINK_FLAGS "-pthread")
