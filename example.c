@@ -45,6 +45,8 @@ void* read_thread_func(
       }
     }
   }
+
+  return NULL;
 }
 
 
