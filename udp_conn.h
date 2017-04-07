@@ -40,7 +40,7 @@ static inline void udp_conn_result_fprint(
   const struct udp_conn_result res)
 {
   if (!res.ok) {
-    fprintf(stream, "%s() error: %s\n", res.func_name, res.err_msg);
+    fprintf(stream, "%s error: %s\n", res.func_name, res.err_msg);
   }
 }
 
