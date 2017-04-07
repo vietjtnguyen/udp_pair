@@ -16,8 +16,8 @@ extern "C" {
 
 /**
  * @brief
- * A convenient struct that encapsulates function results. To check if result
- * is good simply check the @ref ok field. If that is @p false then @ref
+ * A convenience struct that encapsulates function results. To check if result
+ * is good simply check the @ref ok field. If that is @p false (0) then @ref
  * err_num, @ref err_msg, and @ref func_name should be populated. @ref
  * udp_conn_result_fprint() can be used to quickly printing the result as an
  * error message to a file stream.
