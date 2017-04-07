@@ -4,6 +4,11 @@
  * Defines a simple wrapper interface for a UDP "connection". UDP is
  * connectionless but sometimes you want to treat it like a connection.
  */
+#pragma once
+
+#ifndef UDP_CONN_UDP_CONN_H
+#define UDP_CONN_UDP_CONN_H
+
 #include <sys/types.h>
 
 #include <stddef.h>
@@ -168,3 +173,5 @@ struct udp_conn_result udp_conn_recv_nonblock(
 #ifdef __cplusplus
 } // extern "C"
 #endif
+
+#endif // UDP_CONN_UDP_CONN_H
