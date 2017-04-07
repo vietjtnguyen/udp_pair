@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 set(LIB_INSTALL_DIR lib CACHE STRING "(default: lib)")
 add_library(udp_conn SHARED udp_conn.c)
+set_target_properties(
+  udp_conn
+  PROPERTIES
+    VERSION 0.1.0
+    SOVERSION 0.1)
 install(TARGETS udp_conn LIBRARY DESTINATION ${LIB_INSTALL_DIR})
 install(FILES udp_conn.h DESTINATION include)
 
