@@ -19,6 +19,11 @@ udp_conn_free(conn);
 ```
 
 The example sources are more verbose than this snippet due to error checking.
+There are three examples provided:
+
+- `echo_server.c`
+- `example.c`
+- `udpcat.c`
 
 ## Building
 
