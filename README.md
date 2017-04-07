@@ -21,9 +21,9 @@ udp_conn_free(conn);
 The example sources are more verbose than this snippet due to error checking.
 There are three examples provided:
 
-- `echo_server.c`
-- `example.c`
-- `udpcat.c`
+- [`example/echo_server.c`](./example/echo_server.c)
+- [`example/spam_hello_world.c`](./example/spam_hello_world.c)
+- [`bin/udpcat.c`](./bin/udpcat.c)
 
 ## Building
 
