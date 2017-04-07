@@ -10,7 +10,7 @@ struct udp_conn* conn = udp_conn_create(recv_port, dest_ip4, dest_port);
 char buf[512];
 while (1) {
   ssize_t bytes_recvd = 0;
-  udp_conn_recv(conn, buf, sizeof(buf), &bytes_recvd);
+  udp_conn_recv(conn, (void*)buf, sizeof(buf), &bytes_recvd);
   if (bytes_recvd > 0) {
     udp_conn_send(conn, (void*)buf, bytes_recvd, NULL);
   }

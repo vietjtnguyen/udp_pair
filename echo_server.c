@@ -44,7 +44,7 @@ int main(
     // Read data from the UDP connection.
     ssize_t bytes_recvd = 0;
     struct udp_conn_result res =
-      udp_conn_recv(conn, buf, sizeof(buf), &bytes_recvd);
+      udp_conn_recv(conn, (void*)buf, sizeof(buf), &bytes_recvd);
     if (!res.ok) {
       udp_conn_result_fprint(stderr, res);
       break;
