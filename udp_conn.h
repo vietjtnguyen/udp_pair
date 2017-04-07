@@ -87,11 +87,19 @@ struct udp_conn_result udp_conn_construct(
 
 /**
  * @brief
- * Cleans up the UDP connection.
- *
- * Just calls @ref close() on the socket.
+ * Cleans up the UDP connection by alling @ref udp_conn_shutdown().
  */
 void udp_conn_destruct(
+  struct udp_conn* self);
+
+/**
+ * @brief
+ * Shutdown and close the underlying socket so that blocking reads/writes are
+ * interrupted.
+ *
+ * Calls @ref shutdown() and @ref close() on the socket.
+ */
+void udp_conn_shutdown(
   struct udp_conn* self);
 
 /**

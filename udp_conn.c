@@ -138,6 +138,14 @@ void
 udp_conn_destruct(
   struct udp_conn* self)
 {
+  udp_conn_shutdown(self);
+}
+
+
+void
+udp_conn_shutdown(
+  struct udp_conn* self)
+{
   shutdown(self->sock, SHUT_RDWR);
   close(self->sock);
 }

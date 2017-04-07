@@ -98,7 +98,7 @@ int main(
 
   // Make sure the read thread dies too.
   g_alive = 0;
-  udp_conn_destruct(conn);
+  udp_conn_shutdown(conn);
 
   // Join the read thread.
   if (pthread_join(read_thread, NULL) != 0) {
