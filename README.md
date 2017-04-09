@@ -42,3 +42,11 @@ cd build
 cmake ..
 make
 ```
+
+### `udpcat` Example
+
+Once built you can get two `udpcat` processes to talk to each other pretty
+simply. Just open up one session as `udpcat 12345 127.0.0.1 12346` and the
+other as `udpcat 12346 127.0.0.1 12345`. Any lines entered at the prompt
+(`stdin` input) will be sent to the other `udpcat` process and printed to
+`stdout`.
