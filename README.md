@@ -1,21 +1,28 @@
-# udp_conn
+# udp_pair
 
-A very simple C object that wraps the BSD socket API to behave like a UDP
-connection even though UDP is connectionless.
+A very simple C object that wraps the BSD socket API to provide a UDP socket
+pair abstraction. Basically say you have two known endpoints that need to talk
+to each other over UDP. You know the port you are receiving on and the
+address/port of the other end point. You can define a UDP pair object that
+represents your end point and simply send/receive for that set up.
+
+If you look at the code you'll see it's mostly a toy because performing such a
+set up is very straightforward (`bind()`, `connect()`, `send()`, `recv()`), but
+it can be a handy abstraction for those who are not so socket savvy.
 
 ## Example
 
 ```c
-struct udp_conn* conn = udp_conn_create(recv_port, dest_ip4, dest_port);
+struct udp_pair* pair = udp_pair_create(recv_port, dest_ip4, dest_port);
 char buf[512];
 while (1) {
   ssize_t bytes_recvd = 0;
-  udp_conn_recv(conn, (void*)buf, sizeof(buf), &bytes_recvd);
+  udp_pair_recv(pair, (void*)buf, sizeof(buf), &bytes_recvd);
   if (bytes_recvd > 0) {
-    udp_conn_send(conn, (void*)buf, bytes_recvd, NULL);
+    udp_pair_send(pair, (void*)buf, bytes_recvd, NULL);
   }
 }
-udp_conn_free(conn);
+udp_pair_free(pair);
 ```
 
 The example sources are more verbose than this snippet due to error checking.

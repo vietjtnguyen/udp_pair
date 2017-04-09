@@ -1,9 +1,9 @@
 /**
  * @file
  * @brief
- * Defines the UDP connection type and its various associated functions.
+ * Defines the UDP pair type and its various associated functions.
  */
-#include "udp_conn.h"
+#include "udp_pair.h"
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -16,15 +16,15 @@
 #include <unistd.h>
 
 
-static struct udp_conn_result ok_result = {1, 0, NULL};
+static struct udp_pair_result ok_result = {1, 0, NULL};
 
 
 static
-struct udp_conn_result
-udp_conn_create_result_from_errno_with_func_name(
+struct udp_pair_result
+udp_pair_create_result_from_errno_with_func_name(
   const char* func_name)
 {
-  struct udp_conn_result result;
+  struct udp_pair_result result;
   result.ok = (errno == 0);
   result.err_num = errno;
   result.err_msg = strerror(errno);
@@ -34,24 +34,24 @@ udp_conn_create_result_from_errno_with_func_name(
 
 
 #define CREATE_ERRNO_RESULT() \
-  (udp_conn_create_result_from_errno_with_func_name(__PRETTY_FUNCTION__))
+  (udp_pair_create_result_from_errno_with_func_name(__PRETTY_FUNCTION__))
 
 
-struct udp_conn {
+struct udp_pair {
   int sock;
   struct sockaddr_in recv_addr;
   struct sockaddr_in dest_addr;
 };
 
 
-struct udp_conn*
-udp_conn_create(
+struct udp_pair*
+udp_pair_create(
   uint16_t recv_port,
   const char* dest_ip4,
   uint16_t dest_port)
 {
-  struct udp_conn* self = malloc(sizeof(struct udp_conn));
-  struct udp_conn_result res = udp_conn_construct(
+  struct udp_pair* self = malloc(sizeof(struct udp_pair));
+  struct udp_pair_result res = udp_pair_construct(
     self, recv_port, dest_ip4, dest_port);
   if (!res.ok) {
     return NULL;
@@ -61,17 +61,17 @@ udp_conn_create(
 
 
 void
-udp_conn_free(
-  struct udp_conn* self)
+udp_pair_free(
+  struct udp_pair* self)
 {
-  udp_conn_destruct(self);
+  udp_pair_destruct(self);
   free(self);
 }
 
 
-struct udp_conn_result
-udp_conn_construct(
-  struct udp_conn* self,
+struct udp_pair_result
+udp_pair_construct(
+  struct udp_pair* self,
   uint16_t recv_port,
   const char* dest_ip4,
   uint16_t dest_port)
@@ -135,16 +135,16 @@ udp_conn_construct(
 
 
 void
-udp_conn_destruct(
-  struct udp_conn* self)
+udp_pair_destruct(
+  struct udp_pair* self)
 {
-  udp_conn_shutdown(self);
+  udp_pair_shutdown(self);
 }
 
 
 void
-udp_conn_shutdown(
-  struct udp_conn* self)
+udp_pair_shutdown(
+  struct udp_pair* self)
 {
   shutdown(self->sock, SHUT_RDWR);
   close(self->sock);
@@ -152,16 +152,16 @@ udp_conn_shutdown(
 
 
 int
-udp_conn_get_fd(
-  const struct udp_conn* self)
+udp_pair_get_fd(
+  const struct udp_pair* self)
 {
   return self->sock;
 }
 
 
-struct udp_conn_result
-udp_conn_send(
-  struct udp_conn* self,
+struct udp_pair_result
+udp_pair_send(
+  struct udp_pair* self,
   const void* buf,
   const size_t size,
   ssize_t* bytes_sent_out)
@@ -177,9 +177,9 @@ udp_conn_send(
 }
 
 
-struct udp_conn_result
-udp_conn_recv(
-  struct udp_conn* self,
+struct udp_pair_result
+udp_pair_recv(
+  struct udp_pair* self,
   void* buf,
   const size_t size,
   ssize_t* bytes_recvd_out)
@@ -195,9 +195,9 @@ udp_conn_recv(
 }
 
 
-struct udp_conn_result
-udp_conn_send_nonblock(
-  struct udp_conn* self,
+struct udp_pair_result
+udp_pair_send_nonblock(
+  struct udp_pair* self,
   const void* buf,
   const size_t size,
   ssize_t* bytes_sent_out)
@@ -219,9 +219,9 @@ udp_conn_send_nonblock(
 }
 
 
-struct udp_conn_result
-udp_conn_recv_nonblock(
-  struct udp_conn* self,
+struct udp_pair_result
+udp_pair_recv_nonblock(
+  struct udp_pair* self,
   void* buf,
   const size_t size,
   ssize_t* bytes_recvd_out)

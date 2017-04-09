@@ -1,8 +1,8 @@
 /**
  * @file
  * @brief
- * Defines a simple wrapper interface for a UDP "connection". UDP is
- * connectionless but sometimes you want to treat it like a connection.
+ * Declares a simple wrapper interface for a UDP pair where you have two UDP
+ * end points talking directly to each other.
  */
 #pragma once
 
@@ -24,10 +24,10 @@ extern "C" {
  * A convenience struct that encapsulates function results. To check if result
  * is good simply check the @ref ok field. If that is @p false (0) then @ref
  * err_num, @ref err_msg, and @ref func_name should be populated. @ref
- * udp_conn_result_fprint() can be used to quickly printing the result as an
+ * udp_pair_result_fprint() can be used to quickly printing the result as an
  * error message to a file stream.
  */
-struct udp_conn_result {
+struct udp_pair_result {
   int ok;
   int err_num;
   const char* err_msg;
@@ -37,12 +37,12 @@ struct udp_conn_result {
 /**
  * @brief
  * Convenience function for printing the given result to the specified stream
- * in a simple format (for example: <tt>udp_conn_recv_nonblock() error:
+ * in a simple format (for example: <tt>udp_pair_recv_nonblock() error:
  * Connection refused</tt>).
  */
-static inline void udp_conn_result_fprint(
+static inline void udp_pair_result_fprint(
   FILE* stream,
-  const struct udp_conn_result res)
+  const struct udp_pair_result res)
 {
   if (!res.ok) {
     fprintf(stream, "%s error: %s\n", res.func_name, res.err_msg);
@@ -51,51 +51,51 @@ static inline void udp_conn_result_fprint(
 
 /**
  * @brief
- * Opaque type that represnts a UDP "connection".
+ * Opaque type that represents a UDP pair.
  */
-struct udp_conn;
+struct udp_pair;
 
 /**
  * @brief
- * Creates a new UDP connection object.
+ * Creates a new UDP pair object.
  *
  * Allocates the object on the heap using malloc and constructing it using @ref
- * udp_conn_construct().
+ * udp_pair_construct().
  */
-struct udp_conn* udp_conn_create(
+struct udp_pair* udp_pair_create(
   uint16_t recv_port,
   const char* dest_ip4,
   uint16_t dest_port);
 
 /**
  * @brief
- * Frees an object created using @ref udp_conn_create().
+ * Frees an object created using @ref udp_pair_create().
  *
- * Basically calls @ref udp_conn_destruct() on the object and the frees the
+ * Basically calls @ref udp_pair_destruct() on the object and the frees the
  * heap allocated object.
  */
-void udp_conn_free(
-  struct udp_conn* self);
+void udp_pair_free(
+  struct udp_pair* self);
 
 /**
  * @brief
- * Constructs and initializes a UDP connection object "in place".
+ * Constructs and initializes a UDP pair object "in place".
  *
  * This assumes that your object memory already exists and you want to
  * initialize the object at the given memory location.
  */
-struct udp_conn_result udp_conn_construct(
-  struct udp_conn* self,
+struct udp_pair_result udp_pair_construct(
+  struct udp_pair* self,
   uint16_t recv_port,
   const char* dest_ip4,
   uint16_t dest_port);
 
 /**
  * @brief
- * Cleans up the UDP connection by alling @ref udp_conn_shutdown().
+ * Cleans up the UDP pair by calling @ref udp_pair_shutdown().
  */
-void udp_conn_destruct(
-  struct udp_conn* self);
+void udp_pair_destruct(
+  struct udp_pair* self);
 
 /**
  * @brief
@@ -104,15 +104,15 @@ void udp_conn_destruct(
  *
  * Calls @ref shutdown() and @ref close() on the socket.
  */
-void udp_conn_shutdown(
-  struct udp_conn* self);
+void udp_pair_shutdown(
+  struct udp_pair* self);
 
 /**
  * @brief
  * Gets the file descriptor for the underlying socket.
  */
-int udp_conn_get_fd(
-  const struct udp_conn* self);
+int udp_pair_get_fd(
+  const struct udp_pair* self);
 
 /**
  * @brief
@@ -121,8 +121,8 @@ int udp_conn_get_fd(
  * @param bytes_sent_out
  * is set to the number of bytes sent if result is ok, can be set to NULL
  */
-struct udp_conn_result udp_conn_send(
-  struct udp_conn* self,
+struct udp_pair_result udp_pair_send(
+  struct udp_pair* self,
   const void* buf,
   const size_t size,
   ssize_t* bytes_sent_out);
@@ -134,8 +134,8 @@ struct udp_conn_result udp_conn_send(
  * @param bytes_recvd_out
  * is set to the number of bytes received if result is ok, can be set to NULL
  */
-struct udp_conn_result udp_conn_recv(
-  struct udp_conn* self,
+struct udp_pair_result udp_pair_recv(
+  struct udp_pair* self,
   void* buf,
   const size_t size,
   ssize_t* bytes_recvd_out);
@@ -149,8 +149,8 @@ struct udp_conn_result udp_conn_recv(
  * @param bytes_sent_out
  * is set to the number of bytes sent if result is ok, can be set to NULL
  */
-struct udp_conn_result udp_conn_send_nonblock(
-  struct udp_conn* self,
+struct udp_pair_result udp_pair_send_nonblock(
+  struct udp_pair* self,
   const void* buf,
   const size_t size,
   ssize_t* bytes_sent_out);
@@ -164,8 +164,8 @@ struct udp_conn_result udp_conn_send_nonblock(
  * @param bytes_recvd_out
  * is set to the number of bytes received if result is ok, can be set to NULL
  */
-struct udp_conn_result udp_conn_recv_nonblock(
-  struct udp_conn* self,
+struct udp_pair_result udp_pair_recv_nonblock(
+  struct udp_pair* self,
   void* buf,
   const size_t size,
   ssize_t* bytes_recvd_out);

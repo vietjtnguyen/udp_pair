@@ -1,9 +1,9 @@
 /**
  * @file
  * @brief
- * Simple UDP connection echo server example.
+ * Simple UDP pair echo server example.
  */
-#include "udp_conn.h"
+#include "udp_pair.h"
 
 #include <pthread.h>
 #include <sys/types.h>
@@ -31,9 +31,9 @@ int main(
   char* dest_ip4 = argv[2];
   uint16_t dest_port = (uint16_t)atoi(argv[3]);
 
-  // Establish UDP connection.
-  struct udp_conn* conn = udp_conn_create(recv_port, dest_ip4, dest_port);
-  if (!conn) {
+  // Establish UDP pair.
+  struct udp_pair* pair = udp_pair_create(recv_port, dest_ip4, dest_port);
+  if (!pair) {
     fprintf(stderr, "Could not establish UDP connection\n");
     exit(EXIT_FAILURE);
   }
@@ -41,27 +41,27 @@ int main(
   char buf[512];
   while (1) {
 
-    // Read data from the UDP connection.
+    // Read data from the UDP pair.
     ssize_t bytes_recvd = 0;
-    struct udp_conn_result res =
-      udp_conn_recv(conn, (void*)buf, sizeof(buf), &bytes_recvd);
+    struct udp_pair_result res =
+      udp_pair_recv(pair, (void*)buf, sizeof(buf), &bytes_recvd);
     if (!res.ok) {
-      udp_conn_result_fprint(stderr, res);
+      udp_pair_result_fprint(stderr, res);
       break;
     }
 
-    // Send the message over the UDP connection.
+    // Send the message over the UDP pair.
     if (bytes_recvd > 0) {
-      struct udp_conn_result res =
-        udp_conn_send(conn, (void*)buf, bytes_recvd, NULL);
+      struct udp_pair_result res =
+        udp_pair_send(pair, (void*)buf, bytes_recvd, NULL);
       if (!res.ok) {
-        udp_conn_result_fprint(stderr, res);
+        udp_pair_result_fprint(stderr, res);
         exit(EXIT_FAILURE);
       }
     }
   }
 
-  udp_conn_free(conn);
+  udp_pair_free(pair);
 
   exit(EXIT_SUCCESS);
 }
