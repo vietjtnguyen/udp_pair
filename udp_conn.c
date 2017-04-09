@@ -170,7 +170,9 @@ udp_conn_send(
   if (ret == -1) {
     return CREATE_ERRNO_RESULT();
   }
-  bytes_sent_out && (*bytes_sent_out = ret);
+  if (bytes_sent_out) {
+    *bytes_sent_out = ret;
+  }
   return ok_result;
 }
 
@@ -186,7 +188,9 @@ udp_conn_recv(
   if (ret == -1) {
     return CREATE_ERRNO_RESULT();
   }
-  bytes_recvd_out && (*bytes_recvd_out = ret);
+  if (bytes_recvd_out) {
+    *bytes_recvd_out = ret;
+  }
   return ok_result;
 }
 
@@ -203,9 +207,13 @@ udp_conn_send_nonblock(
     if (errno != EAGAIN && errno != EWOULDBLOCK) {
       return CREATE_ERRNO_RESULT();
     }
-    bytes_sent_out && (*bytes_sent_out = 0);
+    if (bytes_sent_out) {
+      *bytes_sent_out = 0;
+    }
   } else {
-    bytes_sent_out && (*bytes_sent_out = ret);
+    if (bytes_sent_out) {
+      *bytes_sent_out = ret;
+    }
   }
   return ok_result;
 }
@@ -223,9 +231,13 @@ udp_conn_recv_nonblock(
     if (errno != EAGAIN && errno != EWOULDBLOCK) {
       return CREATE_ERRNO_RESULT();
     }
-    bytes_recvd_out && (*bytes_recvd_out = 0);
+    if (bytes_recvd_out) {
+      *bytes_recvd_out = 0;
+    }
   } else {
-    bytes_recvd_out && (*bytes_recvd_out = ret);
+    if (bytes_recvd_out) {
+      *bytes_recvd_out = ret;
+    }
   }
   return ok_result;
 }
