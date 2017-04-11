@@ -38,7 +38,8 @@ udp_pair_create_result_from_errno_with_func_name(
 
 
 struct udp_pair {
-  int sock;
+  int recv_sockfd;
+  int send_sockfd;
   struct sockaddr_in recv_addr;
   struct sockaddr_in dest_addr;
 };
@@ -76,11 +77,19 @@ udp_pair_construct(
   const char* dest_ip4,
   uint16_t dest_port)
 {
-  // Create the socket and save the file descriptor. Does not do anything else
-  // like binding to an endpoint, connecting to something, handshaking,
+  // Create the receive socket and save the file descriptor. Does not do
+  // anything else like binding to an endpoint, connecting to something,
+  // handshaking, listening, etc.
+  self->recv_sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+  if (self->recv_sockfd == -1) {
+    return CREATE_ERRNO_RESULT();
+  }
+
+  // Create the send socket and save the file descriptor. Does not do anything
+  // else like binding to an endpoint, connecting to something, handshaking,
   // listening, etc.
-  self->sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-  if (self->sock == -1) {
+  self->send_sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+  if (self->send_sockfd == -1) {
     return CREATE_ERRNO_RESULT();
   }
 
@@ -88,7 +97,7 @@ udp_pair_construct(
   int enable = 1;
 
   ret = setsockopt(
-    self->sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
+    self->recv_sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
   if (ret == -1) {
     return CREATE_ERRNO_RESULT();
   }
@@ -113,7 +122,7 @@ udp_pair_construct(
   // to that receive address. This allows us to just use the read() or recv()
   // API instead of recvfrom().
   ret = bind(
-    self->sock,
+    self->recv_sockfd,
     (const struct sockaddr*)(&self->recv_addr),
     sizeof(self->recv_addr));
   if (ret == -1) {
@@ -123,7 +132,7 @@ udp_pair_construct(
   // UDP is connectionless but if we call connect() on a UDP socket it lets us
   // use just the write() or send() API instead of sendto().
   ret = connect(
-    self->sock,
+    self->send_sockfd,
     (const struct sockaddr*)(&self->dest_addr),
     sizeof(self->dest_addr));
   if (ret == -1) {
@@ -146,8 +155,8 @@ void
 udp_pair_shutdown(
   struct udp_pair* self)
 {
-  shutdown(self->sock, SHUT_RDWR);
-  close(self->sock);
+  shutdown(self->recv_sockfd, SHUT_RDWR);
+  close(self->recv_sockfd);
 }
 
 
@@ -155,7 +164,7 @@ int
 udp_pair_get_fd(
   const struct udp_pair* self)
 {
-  return self->sock;
+  return self->recv_sockfd;
 }
 
 
@@ -166,7 +175,7 @@ udp_pair_send(
   const size_t size,
   ssize_t* bytes_sent_out)
 {
-  ssize_t ret = send(self->sock, buf, size, 0);
+  ssize_t ret = send(self->send_sockfd, buf, size, 0);
   if (ret == -1) {
     return CREATE_ERRNO_RESULT();
   }
@@ -184,7 +193,7 @@ udp_pair_recv(
   const size_t size,
   ssize_t* bytes_recvd_out)
 {
-  ssize_t ret = recv(self->sock, buf, size, 0);
+  ssize_t ret = recv(self->recv_sockfd, buf, size, 0);
   if (ret == -1) {
     return CREATE_ERRNO_RESULT();
   }
@@ -202,7 +211,7 @@ udp_pair_send_nonblock(
   const size_t size,
   ssize_t* bytes_sent_out)
 {
-  ssize_t ret = send(self->sock, buf, size, MSG_DONTWAIT);
+  ssize_t ret = send(self->send_sockfd, buf, size, MSG_DONTWAIT);
   if (ret == -1) {
     if (errno != EAGAIN && errno != EWOULDBLOCK) {
       return CREATE_ERRNO_RESULT();
@@ -226,7 +235,7 @@ udp_pair_recv_nonblock(
   const size_t size,
   ssize_t* bytes_recvd_out)
 {
-  ssize_t ret = recv(self->sock, buf, size, MSG_DONTWAIT);
+  ssize_t ret = recv(self->recv_sockfd, buf, size, MSG_DONTWAIT);
   if (ret == -1) {
     if (errno != EAGAIN && errno != EWOULDBLOCK) {
       return CREATE_ERRNO_RESULT();
