@@ -77,17 +77,13 @@ udp_pair_construct(
   const char* dest_ip4,
   uint16_t dest_port)
 {
-  // Create the receive socket and save the file descriptor. Does not do
-  // anything else like binding to an endpoint, connecting to something,
-  // handshaking, listening, etc.
+  // Create the receive socket and save the file descriptor.
   self->recv_sockfd = socket(PF_INET, SOCK_DGRAM, 0);
   if (self->recv_sockfd == -1) {
     return CREATE_ERRNO_RESULT();
   }
 
-  // Create the send socket and save the file descriptor. Does not do anything
-  // else like binding to an endpoint, connecting to something, handshaking,
-  // listening, etc.
+  // Create the send socket and save the file descriptor.
   self->send_sockfd = socket(PF_INET, SOCK_DGRAM, 0);
   if (self->send_sockfd == -1) {
     return CREATE_ERRNO_RESULT();
@@ -110,8 +106,7 @@ udp_pair_construct(
   self->recv_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
   self->recv_addr.sin_port = htons(recv_port);
 
-  // Define our destination address struct which is used for "connecting" the
-  // socket to a destination end point.
+  // Define our destination address struct.
   memset(&(self->dest_addr), 0, sizeof(self->dest_addr));
   self->dest_addr.sin_family = AF_INET;
   self->dest_addr.sin_addr.s_addr = inet_addr(dest_ip4);
@@ -125,16 +120,6 @@ udp_pair_construct(
     self->recv_sockfd,
     (const struct sockaddr*)(&self->recv_addr),
     sizeof(self->recv_addr));
-  if (ret == -1) {
-    return CREATE_ERRNO_RESULT();
-  }
-
-  // UDP is connectionless but if we call connect() on a UDP socket it lets us
-  // use just the write() or send() API instead of sendto().
-  ret = connect(
-    self->send_sockfd,
-    (const struct sockaddr*)(&self->dest_addr),
-    sizeof(self->dest_addr));
   if (ret == -1) {
     return CREATE_ERRNO_RESULT();
   }
@@ -175,7 +160,10 @@ udp_pair_send(
   const size_t size,
   ssize_t* bytes_sent_out)
 {
-  ssize_t ret = send(self->send_sockfd, buf, size, 0);
+  ssize_t ret = sendto(
+    self->send_sockfd, buf, size, 0,
+    (const struct sockaddr*)(&self->dest_addr),
+    sizeof(self->dest_addr));
   if (ret == -1) {
     return CREATE_ERRNO_RESULT();
   }
@@ -211,7 +199,10 @@ udp_pair_send_nonblock(
   const size_t size,
   ssize_t* bytes_sent_out)
 {
-  ssize_t ret = send(self->send_sockfd, buf, size, MSG_DONTWAIT);
+  ssize_t ret = sendto(
+    self->send_sockfd, buf, size, MSG_DONTWAIT,
+    (const struct sockaddr*)(&self->dest_addr),
+    sizeof(self->dest_addr));
   if (ret == -1) {
     if (errno != EAGAIN && errno != EWOULDBLOCK) {
       return CREATE_ERRNO_RESULT();
