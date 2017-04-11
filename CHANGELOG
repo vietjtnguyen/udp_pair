@@ -1,0 +1,14 @@
+0.1.1
+-----
+
+- No API changes.
+- Experienced some unreliability in using the same socket for both sending and
+  receiving. There are now two sockets: a receive and a send socket.
+- Using connect() and send() to send messages was unreliable in a multi-machine
+  test. The connect() call has been dropped and send() has been modified to
+  sendto().
+
+0.1.0
+-----
+
+- Initial release
